@@ -38,14 +38,18 @@
           RawXML.normalize();
           console.log(new XMLSerializer().serializeToString(RawXML));
           }
+        }
           x = RawXML.getElementsByTagName("*");
-          console.log(x.length);
+          console.log("x length: " + x.length);
 
           for (i = 0; i < x.length ;i++) {
-            console.log(x[i].firstChild.nodeType);
+            //console.log(x[i].firstChild.nodeType);
             // Check for is a text node and containing element has no child
-            if ( (x[i].firstChild.nodeType == 3 || x[i].firstChild.nodeType == 4) && x[i].firstChild.isEqualNode(x[i].lastChild))
-            {
+            //if ( (x[i].firstChild.nodeType == 3 || x[i].firstChild.nodeType == 4) && x[i].firstChild.isEqualNode(x[i].lastChild))
+            //&& (x[i].firstChild.nodeType == 3 && x[i].lastChild.nodeType == 3)
+            var xchildNodes = x[i].childNodes;
+            if(xchildNodes.length<=1){
+              alert("Has Child");
               var str1 = x[i].nodeName;
               var colonPos = str1.search(":");
               var stripedNodeName = str1.substr(colonPos+1);
@@ -53,13 +57,25 @@
               //alert("Striped Node Name: "+ stripedNodeName);
               console.log("Striped Node Name: " + stripedNodeName);
               newValue = "%%" + stripedNodeName +"_" + counterValue +"%%";
+              //x[i].textContent = newValue;
+              //txt += x[i].nodeName + ": " + newValue + "\n";
+              if(xchildNodes.length == 0){
+                x[i].textContent = newValue;
+              /*  var newTxtNode = document.createTextNode(newValue);
+                x[i].appendChild(newTxtNode);
+                */
+                alert("No Child");
+              }
+              else{
               x[i].firstChild.nodeValue = newValue;
-              txt += x[i].nodeName + ": " + newValue + "\n";
+              alert("Child Present");
+              //txt += x[i].nodeName + ": " + newValue + "\n";
               //alert(txt);
+              }
               console.log(txt);
             }
           }
-        }
+
         txt = xmlSer.serializeToString(RawXML);
         //alert("Hi2");
         console.log("Hi2");
