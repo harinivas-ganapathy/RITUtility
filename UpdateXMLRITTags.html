@@ -5,6 +5,14 @@
   </head>
   <body>
     <P>Enter a Raw XML</p>
+      <form>
+        <input onchange="toggleOrderList(this);" id = 'PlainName' type='radio' name="updateType" value="PlainName" checked>Plain Name
+        <input onchange="toggleOrderList(this);" id = 'Sequence' type='radio' name="updateType" value="Sequence" >Numbered Sequence
+        <select id = 'SequenceOrder' name="TagOrder" disabled="true">Select Order
+          <option value="zero">Start with... 0 (default)</option>
+          <option value="one">Start with... 1</option>
+        </select><br>
+    </form>
     <textarea id="RawXMLTXTA" rows="20" cols="75"></textarea><br>
     <button type="button" onclick="updateXML();"><B>Process XML</B></button>
     <button type="button" onclick="clearTxt();"><B>Clear</B></button>
@@ -15,9 +23,12 @@
     var hTable = {};
     var xmlSer = new XMLSerializer();
     var sURL = unescape(window.location.pathname); //storing the URL for refreshing the page
+    var orderListStartval;
       function updateXML(){
         hTable = {};
         document.getElementById("UpdatedXMLTXTA").value = null;
+        var optionSelected = getRadioCheckedValue("updateType");
+        //alert(optionSelected);
         console.log("Hello World! Function Successfully Called");
         //---this is for IE.
         var strForXML = document.getElementById("RawXMLTXTA").value;
@@ -43,46 +54,42 @@
           console.log("x length: " + x.length);
 
           for (i = 0; i < x.length ;i++) {
-            //console.log(x[i].firstChild.nodeType);
-            // Check for is a text node and containing element has no child
-            //if ( (x[i].firstChild.nodeType == 3 || x[i].firstChild.nodeType == 4) && x[i].firstChild.isEqualNode(x[i].lastChild))
-            //&& (x[i].firstChild.nodeType == 3 && x[i].lastChild.nodeType == 3)
             var xchildNodes = x[i].childNodes;
             if(xchildNodes.length<=1){
-              alert("Has Child");
+              //alert("Has Child");
               var str1 = x[i].nodeName;
               var colonPos = str1.search(":");
               var stripedNodeName = str1.substr(colonPos+1);
               var counterValue = checkInHashTable(stripedNodeName);
               //alert("Striped Node Name: "+ stripedNodeName);
               console.log("Striped Node Name: " + stripedNodeName);
-              newValue = "%%" + stripedNodeName +"_" + counterValue +"%%";
-              //x[i].textContent = newValue;
-              //txt += x[i].nodeName + ": " + newValue + "\n";
+              if(optionSelected == "PlainName"){
+                newValue = "%%" + stripedNodeName +"%%";
+              }
+              else if (optionSelected=="Sequence"){
+                newValue = "%%" + stripedNodeName +"_" + counterValue +"%%";
+              }
               if(xchildNodes.length == 0){
                 x[i].textContent = newValue;
-              /*  var newTxtNode = document.createTextNode(newValue);
-                x[i].appendChild(newTxtNode);
-                */
-                alert("No Child");
               }
               else{
               x[i].firstChild.nodeValue = newValue;
-              alert("Child Present");
-              //txt += x[i].nodeName + ": " + newValue + "\n";
-              //alert(txt);
               }
               console.log(txt);
             }
           }
 
         txt = xmlSer.serializeToString(RawXML);
-        //alert("Hi2");
-        console.log("Hi2");
         document.getElementById("UpdatedXMLTXTA").value = txt;
       }
       function checkInHashTable (elementName){
         var counter;
+        if(GetSelectedItem("SequenceOrder")=='one'){
+        orderListStartval = 1;
+        }
+        else{
+        orderListStartval = 0;
+        }
         if(hTable.hasOwnProperty(elementName)){
           hTable[elementName] = hTable[elementName] + 1;
           counter = hTable[elementName];
@@ -90,7 +97,7 @@
           console.log("Found in HashTable" + counter);
         }
         else{
-          hTable[elementName] = 1;
+          hTable[elementName] = orderListStartval;
           counter = hTable[elementName];
           //alert("Not Found in HashTable" + counter);
           console.log("Not Found in HashTable" + counter);
@@ -102,10 +109,38 @@
         document.getElementById("UpdatedXMLTXTA").value = '';
         document.getElementById("RawXMLTXTA").value = '';
       }
+      function getRadioCheckedValue(radio_name)
+      {
+        var oRadio = document.forms[0].elements[radio_name];
+
+        for(var i = 0; i < oRadio.length; i++)
+        {
+          if(oRadio[i].checked)
+          {
+            return oRadio[i].value;
+          }
+        }
+
+        return '';
+      }
 
       function refresh()
       {
         window.location.href = sURL;
+      }
+
+      function toggleOrderList(elementName){
+        if (getRadioCheckedValue("updateType") == 'Sequence'){
+          document.getElementById("SequenceOrder").disabled=false;
+        }
+        else{
+          document.getElementById("SequenceOrder").disabled=true;
+        }
+      }
+      function GetSelectedItem(el){
+        var e = document.getElementById(el);
+        var strSel = e.options[e.selectedIndex].value;
+        return e.options[e.selectedIndex].value;
       }
     </script>
   </body>
